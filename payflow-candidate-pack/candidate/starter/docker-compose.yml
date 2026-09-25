@@ -1,0 +1,13 @@
+services:
+  payflow-sandbox:
+    build:
+      context: ./src/PayFlow.MockServer
+      dockerfile: Dockerfile
+    container_name: payflow-sandbox
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+    extra_hosts:
+      # lets the sandbox reach a webhook receiver running on your host
+      - "host.docker.internal:host-gateway"

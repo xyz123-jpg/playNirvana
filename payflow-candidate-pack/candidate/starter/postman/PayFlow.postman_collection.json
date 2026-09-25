@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "PayFlow API v2 — Sandbox",
+    "description": "Sandbox collection for the PayFlow v2 card acquiring API. Set the collection variables before use.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/v2" },
+    { "key": "apiKey", "value": "pf_test_4b81d0f7a2c94e36b5170ac8e93d2f61" },
+    { "key": "webhookUrl", "value": "http://localhost:5099/webhooks/payflow" },
+    { "key": "paymentId", "value": "" }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "X-PayFlow-Key" },
+      { "key": "value", "value": "{{apiKey}}" },
+      { "key": "in", "value": "header" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "http://localhost:8080/health", "host": ["localhost"], "port": "8080", "path": ["health"] }
+      }
+    },
+    {
+      "name": "Webhook endpoints",
+      "item": [
+        {
+          "name": "Register webhook endpoint",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"url\": \"{{webhookUrl}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/webhook-endpoints", "host": ["{{baseUrl}}"], "path": ["webhook-endpoints"] }
+          }
+        },
+        {
+          "name": "List webhook endpoints",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/webhook-endpoints", "host": ["{{baseUrl}}"], "path": ["webhook-endpoints"] }
+          }
+        },
+        {
+          "name": "Clear webhook endpoints",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/webhook-endpoints", "host": ["{{baseUrl}}"], "path": ["webhook-endpoints"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create payment — approved card",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.paymentId) { pm.collectionVariables.set('paymentId', body.paymentId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1999,\n  \"currency\": \"EUR\",\n  \"merchantReference\": \"ORDER-10045\",\n  \"card\": {\n    \"number\": \"4242424242424242\",\n    \"expiryMonth\": 3,\n    \"expiryYear\": 2030,\n    \"cvv\": \"737\",\n    \"holderName\": \"J. Horvat\"\n  },\n  \"returnUrl\": \"http://localhost:5099/payment/return\",\n  \"shopperEmail\": \"jhorvat@example.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/payments", "host": ["{{baseUrl}}"], "path": ["payments"] }
+          }
+        },
+        {
+          "name": "Create payment — declined card",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1999,\n  \"currency\": \"EUR\",\n  \"merchantReference\": \"ORDER-10046\",\n  \"card\": {\n    \"number\": \"4111111111111111\",\n    \"expiryMonth\": 3,\n    \"expiryYear\": 2030,\n    \"cvv\": \"737\"\n  },\n  \"returnUrl\": \"http://localhost:5099/payment/return\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/payments", "host": ["{{baseUrl}}"], "path": ["payments"] }
+          }
+        },
+        {
+          "name": "Create payment — 3-D Secure",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1999,\n  \"currency\": \"EUR\",\n  \"merchantReference\": \"ORDER-10047\",\n  \"card\": {\n    \"number\": \"4000000000003220\",\n    \"expiryMonth\": 3,\n    \"expiryYear\": 2030,\n    \"cvv\": \"737\"\n  },\n  \"returnUrl\": \"http://localhost:5099/payment/return\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/payments", "host": ["{{baseUrl}}"], "path": ["payments"] }
+          }
+        },
+        {
+          "name": "Get payment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "{{paymentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Capture payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 1999\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}/captures",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "{{paymentId}}", "captures"]
+            }
+          }
+        },
+        {
+          "name": "Refund payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 1999,\n  \"reason\": \"Customer returned item\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}/refunds",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "{{paymentId}}", "refunds"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sandbox tools",
+      "item": [
+        {
+          "name": "Recent webhook deliveries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/__sandbox/deliveries",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["__sandbox", "deliveries"]
+            }
+          }
+        },
+        {
+          "name": "All payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/__sandbox/payments",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["__sandbox", "payments"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
