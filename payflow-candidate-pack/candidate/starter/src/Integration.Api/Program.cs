@@ -15,6 +15,16 @@ builder.Services.AddHttpClient<IPayFlowGateway, PayFlowGateway>(client =>
 
 var app = builder.Build();
 
+public record PayRequest(
+    long Amount,
+    string Currency,
+    string CardNumber,
+    int ExpiryMonth,
+    int ExpiryYear,
+    string Cvv,
+    string? HolderName,
+    string ReturnUrl);
+
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 // -------------------------------------------------------------------------
