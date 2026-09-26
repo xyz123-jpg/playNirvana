@@ -31,7 +31,14 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 // Take a card payment for an order.
 // -------------------------------------------------------------------------
 app.MapPost("/orders/{orderId}/pay", (string orderId) =>
-    Results.StatusCode(StatusCodes.Status501NotImplemented));
+    {
+    return Results.Ok(new
+    {
+        orderId,
+        request.Amount,
+        request.Currency
+    });
+});
 
 // -------------------------------------------------------------------------
 // What our Order service asks when it wants the current state of a payment.
